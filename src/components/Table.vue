@@ -2,6 +2,7 @@
 	<v-data-table
 		:headers="!isAddressExtended ? headers : extendedHeaders"
 		:items="users"
+		mobile-breakpoint="1000"
 		sort-by="id"
 		class="elevation-1"
 	>
@@ -14,7 +15,7 @@
 				<v-toolbar-title>My Users CRUD From REST API</v-toolbar-title>
 				<v-divider class="mx-4" inset vertical></v-divider>
 				<v-spacer></v-spacer>
-				<v-dialog v-model="dialog" max-width="500px">
+				<v-dialog v-model="dialog" max-width="600px">
 					<template v-slot:activator="{ on, attrs }">
 						<v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on"> New User </v-btn>
 					</template>
@@ -70,7 +71,7 @@
 						</v-card-actions>
 					</v-card>
 				</v-dialog>
-				<v-dialog v-model="dialogDelete" max-width="500px">
+				<v-dialog v-model="dialogDelete" max-width="600px">
 					<v-card>
 						<v-card-title class="text-h5">Are you sure you want to delete this user?</v-card-title>
 						<v-card-actions>
