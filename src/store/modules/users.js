@@ -9,7 +9,7 @@ const state = () => ({
 const getters = {
 	getLastUser: (state) => {
 		return state.all[state.all.length - 1]
-	} 
+	},
 }
 
 // actions
@@ -21,14 +21,20 @@ const actions = {
 	},
 	changeUserById({ commit }, user) {
 		commit("changeUserById", user)
+		/* // if we need it in the task
+		db.sendUsers(state.all) */
 	},
 	deleteUserById({ commit }, id) {
 		commit("deleteUserById", id)
+		/* // if we need it in the task
+		db.sendUsers(state.all) */
 	},
 	addNewUser({ commit, getters }, user) {
 		let id = getters.getLastUser.id
 		user.id = ++id
 		commit("addNewUser", user)
+		/* // if we need it in the task
+		db.sendUsers(state.all) */
 	},
 }
 
