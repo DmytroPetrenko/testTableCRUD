@@ -9,10 +9,7 @@ const state = () => ({
 const getters = {
 	getLastUser: (state) => {
 		return state.all[state.all.length - 1]
-	} /* 
-	getUserById: (state, id) => {
-		return state.all[state.all[++id]]
-	}, */,
+	} 
 }
 
 // actions
@@ -24,6 +21,9 @@ const actions = {
 	},
 	changeUserById({ commit }, user) {
 		commit("changeUserById", user)
+	},
+	deleteUserById({ commit }, id) {
+		commit("deleteUserById", id)
 	},
 	addNewUser({ commit, getters }, user) {
 		let id = getters.getLastUser.id
@@ -41,8 +41,19 @@ const mutations = {
 		state.all.push(user)
 	},
 	changeUserById(state, user) {
-		Object.assign(state.all[--user.id], user)
-		/* state.all[user.id] = user */
+		for (let i = 0; i < state.all.length; i++)
+			if (state.all[i].id === user.id) {
+				state.all.splice(i, 1)
+				break
+			}
+		state.all.push(user)
+	},
+	deleteUserById(state, id) {
+		for (let i = 0; i < state.all.length; i++)
+			if (state.all[i].id === id) {
+				state.all.splice(i, 1)
+				break
+			}
 	},
 }
 

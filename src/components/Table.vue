@@ -1,5 +1,14 @@
 <template>
-	<v-data-table :headers="headers" :items="users" sort-by="price" class="elevation-1">
+	<v-data-table
+		:headers="!isAddressExtended ? headers : extendedHeaders"
+		:items="users"
+		sort-by="id"
+		class="elevation-1"
+	>
+		<template v-slot:[`header.address.city`]="{ header }">
+			{{ header.text }}
+			<v-icon @click="openAddress(header, $event)">mdi-menu</v-icon>
+		</template>
 		<template v-slot:top>
 			<v-toolbar flat>
 				<v-toolbar-title>My Users CRUD From REST API</v-toolbar-title>
@@ -27,7 +36,28 @@
 										<v-text-field v-model="editedItem.email" label="Email"></v-text-field>
 									</v-col>
 									<v-col cols="12" sm="6" md="4">
-										<v-text-field v-model="editedItem.address" label="Address"></v-text-field>
+										<v-text-field v-model="editedItem.address.city" label="City"></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6" md="4">
+										<v-text-field v-model="editedItem.address.street" label="Street"></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6" md="4">
+										<v-text-field v-model="editedItem.address.suite" label="Suite"></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6" md="4">
+										<v-text-field
+											v-model="editedItem.address.zipcode"
+											label="Zipcode"
+										></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6" md="4">
+										<v-text-field v-model="editedItem.phone" label="Phone"></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6" md="4">
+										<v-text-field v-model="editedItem.website" label="Website"></v-text-field>
+									</v-col>
+									<v-col cols="12" sm="6" md="4">
+										<v-text-field v-model="editedItem.company.name" label="Company"></v-text-field>
 									</v-col>
 								</v-row>
 							</v-container>
@@ -64,10 +94,12 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex"
+import _cloneDeep from "lodash/cloneDeep"
 export default {
 	data: () => ({
 		dialog: false,
 		dialogDelete: false,
+		isAddressExtended: false,
 		headers: [
 			{
 				text: "Name",
@@ -76,7 +108,27 @@ export default {
 			},
 			{ text: "Username", value: "username" },
 			{ text: "Email", value: "email" },
-			{ text: "Address", value: "address", sortable: false },
+			{ text: "Address", value: "address.city" },
+			{ text: "Phone", value: "phone" },
+			{ text: "Website", value: "website" },
+			{ text: "Company", value: "company.name" },
+			{ text: "Actions", value: "actions", sortable: false },
+		],
+		extendedHeaders: [
+			{
+				text: "Name",
+				align: "start",
+				value: "name",
+			},
+			{ text: "Username", value: "username" },
+			{ text: "Email", value: "email" },
+			{ text: "City", value: "address.city" },
+			{ text: "Street", value: "address.street" },
+			{ text: "Suite", value: "address.suite" },
+			{ text: "Zipcode", value: "address.zipcode" },
+			{ text: "Phone", value: "phone" },
+			{ text: "Website", value: "website" },
+			{ text: "Company", value: "company.name" },
 			{ text: "Actions", value: "actions", sortable: false },
 		],
 		desserts: [],
@@ -85,13 +137,45 @@ export default {
 			name: "",
 			username: "",
 			email: "",
-			address: "",
+			address: {
+				street: "",
+				suite: "",
+				city: "",
+				zipcode: "",
+				geo: {
+					lat: "",
+					lng: "",
+				},
+			},
+			phone: "",
+			website: "",
+			company: {
+				name: "",
+				catchPhrase: "",
+				bs: "",
+			},
 		},
 		defaultItem: {
 			name: "",
 			username: "",
 			email: "",
-			address: "",
+			address: {
+				street: "",
+				suite: "",
+				city: "",
+				zipcode: "",
+				geo: {
+					lat: "",
+					lng: "",
+				},
+			},
+			phone: "",
+			website: "",
+			company: {
+				name: "",
+				catchPhrase: "",
+				bs: "",
+			},
 		},
 	}),
 
@@ -118,7 +202,7 @@ export default {
 	},
 
 	methods: {
-		...mapActions("users", ["addNewUser", "changeUserById"]),
+		...mapActions("users", ["addNewUser", "changeUserById", "deleteUserById"]),
 
 		initialize() {
 			this.$store.dispatch("users/getAllUsers")
@@ -126,25 +210,27 @@ export default {
 
 		editItem(item) {
 			this.editedIndex = this.users.indexOf(item)
-			this.editedItem = Object.assign({}, item)
+			this.editedItem = _cloneDeep(item)
 			this.dialog = true
 		},
 
 		deleteItem(item) {
-			this.editedIndex = this.users.indexOf(item)
-			this.editedItem = Object.assign({}, item)
+			this.editedIndex = item.id
+			this.editedItem = _cloneDeep(item)
+
 			this.dialogDelete = true
 		},
 
 		deleteItemConfirm() {
-			this.users.splice(this.editedIndex, 1)
+			this.deleteUserById(this.editedIndex)
+
 			this.closeDelete()
 		},
 
 		close() {
 			this.dialog = false
 			this.$nextTick(() => {
-				this.editedItem = Object.assign({}, this.defaultItem)
+				this.editedItem = _cloneDeep(this.defaultItem)
 				this.editedIndex = -1
 			})
 		},
@@ -152,7 +238,8 @@ export default {
 		closeDelete() {
 			this.dialogDelete = false
 			this.$nextTick(() => {
-				this.editedItem = Object.assign({}, this.defaultItem)
+				this.editedItem = _cloneDeep(this.defaultItem)
+
 				this.editedIndex = -1
 			})
 		},
@@ -161,11 +248,17 @@ export default {
 			if (this.editedIndex > -1) {
 				const id = { id: this.editedIndex }
 				const newUser = Object.assign({}, id, this.editedItem)
+
 				this.changeUserById(newUser)
 			} else {
 				this.addNewUser(this.editedItem)
 			}
 			this.close()
+		},
+
+		openAddress(header, event) {
+			event.stopPropagation()
+			this.isAddressExtended = !this.isAddressExtended
 		},
 	},
 }
