@@ -47,11 +47,12 @@ const mutations = {
 		state.all.push(user)
 	},
 	changeUserById(state, user) {
-		for (let i = 0; i < state.all.length; i++)
+		/* for (let i = 0; i < state.all.length; i++)
 			if (state.all[i].id === user.id) {
 				state.all.splice(i, 1, user)
 				break
-			}
+			} */
+		state.all.splice(user.id - 1, 1, user)
 	},
 	deleteUserById(state, id) {
 		for (let i = 0; i < state.all.length; i++)
