@@ -228,21 +228,19 @@ export default {
 			this.closeDelete()
 		},
 
-		close() {
+		async close() {
 			this.dialog = false
-			this.$nextTick(() => {
-				this.editedItem = _cloneDeep(this.defaultItem)
-				this.editedIndex = -1
-			})
+			await this.$nextTick()
+			this.editedItem = _cloneDeep(this.defaultItem)
+			this.editedIndex = -1
 		},
 
-		closeDelete() {
+		async closeDelete() {
 			this.dialogDelete = false
-			this.$nextTick(() => {
-				this.editedItem = _cloneDeep(this.defaultItem)
+			await this.$nextTick()
+			this.editedItem = _cloneDeep(this.defaultItem)
 
-				this.editedIndex = -1
-			})
+			this.editedIndex = -1
 		},
 
 		save() {
